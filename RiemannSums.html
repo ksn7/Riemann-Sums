@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Riemann Sums Approximation</title>
+    <script src="https://sagecell.sagemath.org/static/jquery.min.js"></script>
+    <script src="https://sagecell.sagemath.org/embedded_sagecell.js"></script>
+    <script>
+$(function () {
+    // Make *any* div with class 'compute' a Sage cell
+    sagecell.makeSagecell({inputLocation: 'div.compute',
+    						template:       sagecell.templates.minimal,
+                           evalButtonText: 'Launch the Interactive Applet Now'});
+});
+    </script>
+  </head>
+  <body style="width: 1000px;">
+
+  <h1>Riemann Sums Approximation</h1>
+
+<p>An Interactive Applet powered by Sage and MathJax.</p>
+<p>(By Kelsey Norman, html code from Prof. Gregory V. Bard)</p>
+
+<hr>
+
+<div class="compute">
+<script type="text/x-sage">
+
+@interact
+def riemann( sum_type = selector(['left', 'right', 'midpoint', 'minimum', 'maximum'], label = 'type of sum:'), 
+        func = input_box( default = (x-2)^3 + 3, label = "function of x"),
+        lower = slider(-2, 6, 0.1, 2, label = "lower bound"), 
+        upper = slider(-2, 6, 0.1, 5, label = "upper bound"), 
+        n = input_box(default=3, label = "number of intervals", type = int ), 
+        sums = False
+        ):
+            
+    print( "If you have updated one of the entry fields, please hit enter to render the new graph." )
+            
+    # before plotting, check lower < upper
+    if lower > upper :
+        raise ValueError ('Please make sure the lower bound is lower than or equal to the upper bound.')
+    
+    # function definition
+    f(x) = func.function(x)
+    
+    # label endpoints with a and b
+    if f(lower) >= 0:
+        lower_label = text( 'a', (lower, -4), color = 'red' )
+    else:
+        lower_label = text( 'a', (lower, 4), color = 'red' )   
+    if f(upper) >= 0:
+        upper_label = text( 'b', (upper, -4), color = 'red' )
+    else: 
+        upper_label = text( 'b', (upper, 4), color = 'red' )
+
+    # plots curve and shows area to integrate
+    curve = plot( f(x), -2, 6, ymin = -20, ymax = 40 )
+    integral_area = plot( f(x), lower, upper, ymin = -20, ymax = 40, fill = True, fillcolor = '#F1FC16' )
+    
+    # set up for Riemann rectangles
+    width = (upper - lower) / n
+    half_width = width / 2
+    int_min = lower
+    midpoint = lower + half_width
+    int_max = lower + width
+    f_min = f(x).find_local_minimum(int_min, int_max)
+    min_height = f_min[0]
+    f_max = f(x).find_local_maximum(int_min, int_max)
+    max_height = f_max[0]
+    
+    # if-branch for sum_types
+    if sum_type == 'left' :
+        # define first rectangle - need "rectangles" to exist before entering the loop.
+        rectangles = polygon([ (lower, 0), (lower, f(lower)), (int_max, f(lower)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
+            thickness = 2, aspect_ratio = 'automatic')
+        sum = width * f(int_min)
+    
+        # reset interval max and min
+        int_min = int_max
+        int_max += width
+    
+        # Riemann rectangles
+        while int_min < upper :
+            rectangles += polygon([ (int_min, 0), (int_min, f(int_min)), (int_max, f(int_min)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
+                thickness = 2, aspect_ratio = 'automatic')
+            sum += width * f(int_min)
+            int_min = int_max
+            int_max += width
+            
+    elif sum_type == 'right':
+        # define first rectangle - need "rectangles" to exist before entering the loop.
+        rectangles = polygon([ (lower, 0), (lower, f(int_max)), (int_max, f(int_max)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
+            thickness = 2, aspect_ratio = 'automatic')
+        sum = width * f(int_max)
+    
+        # reset interval max and min
+        int_min = int_max
+        int_max += width
+    
+        # Riemann rectangles
+        while int_min < upper :
+            rectangles += polygon([ (int_min, 0), (int_min, f(int_max)), (int_max, f(int_max)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
+                thickness = 2, aspect_ratio = 'automatic')
+            sum += width * f(int_max)
+            int_min = int_max
+            int_max += width
+            
+    elif sum_type == 'midpoint':
+        # define first rectangle - need "rectangles" to exist before entering the loop.
+        rectangles = polygon([ (lower, 0), (lower, f(midpoint)), (int_max, f(midpoint)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
+            thickness = 2, aspect_ratio = 'automatic')
+        sum = width * f(midpoint)
+    
+        # reset interval max and min
+        int_min = int_max
+        midpoint += width
+        int_max += width
+    
+        # Riemann rectangles
+        while int_min < upper :
+            rectangles += polygon([ (int_min, 0), (int_min, f(midpoint)), (int_max, f(midpoint)), (int_max, 0) ], color = '#60A70F', 
+                edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
+            sum += width * f(midpoint)
+            int_min = int_max
+            midpoint += width
+            int_max += width
+        
+    elif sum_type == 'minimum':
+        # define first rectangle - need "rectangles" to exist before entering the loop.
+        rectangles = polygon([ (lower, 0), (lower, min_height), (int_max, min_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
+            thickness = 2, aspect_ratio = 'automatic')
+        sum = width * min_height
+    
+        # reset interval max and min
+        int_min = int_max
+        int_max += width
+    
+        # Riemann rectangles
+        while int_max <= upper :
+            f_min = f(x).find_local_minimum(int_min, int_max)
+            min_height = f_min[0]
+            rectangles += polygon([ (int_min, 0), (int_min, min_height), (int_max, min_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
+                thickness = 2, aspect_ratio = 'automatic')
+            sum += width * min_height
+            int_min = int_max
+            int_max += width
+            
+    elif sum_type == 'maximum':
+        # define first rectangle - need "rectangles" to exist before entering the loop.
+        rectangles = polygon([ (lower, 0), (lower, max_height), (int_max, max_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
+            thickness = 2, aspect_ratio = 'automatic')
+        sum = width * max_height
+    
+        # reset interval max and min
+        int_min = int_max
+        int_max += width
+    
+        # Riemann rectangles
+        while int_max <= upper :
+            f_max = f(x).find_local_maximum(int_min, int_max)
+            max_height = f_max[0]
+            rectangles += polygon([ (int_min, 0), (int_min, max_height), (int_max, max_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
+                thickness = 2, aspect_ratio = 'automatic')
+            sum += width * max_height
+            int_min = int_max
+            int_max += width     
+         
+                      
+    # combine all plots and display them superimposed
+    graph = curve + integral_area + lower_label + upper_label + rectangles
+    graph.show()
+    
+    # option for displaying the Riemann sum
+    if sums == True :
+        print( "The sum of the rectangles is %f." % sum )
+        area = integral( f(x), x, lower, upper )
+        print( "The actual area under the curve is %f." % area )
+
+
+</script>
+</div>
+
+<hr>
+Last modified on May 30th, 2017.
+</body>
+</html>
