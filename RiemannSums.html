@@ -65,107 +65,64 @@ def riemann( sum_type = selector(['left', 'right', 'midpoint', 'minimum', 'maxim
     int_min = lower
     midpoint = lower + half_width
     int_max = lower + width
-    f_min = f(x).find_local_minimum(int_min, int_max)
-    min_height = f_min[0]
+    rectangles = polygon([ (lower, 0), (lower, f(lower)), (int_max, 0) ], aspect_ratio = 'automatic' )
+    sum = 0
     f_max = f(x).find_local_maximum(int_min, int_max)
     max_height = f_max[0]
     
     # if-branch for sum_types
     if sum_type == 'left' :
-        # define first rectangle - need "rectangles" to exist before entering the loop.
-        rectangles = polygon([ (lower, 0), (lower, f(lower)), (int_max, f(lower)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
-            thickness = 2, aspect_ratio = 'automatic')
-        sum = width * f(int_min)
-    
-        # reset interval max and min
-        int_min = int_max
-        int_max += width
-    
         # Riemann rectangles
-        while int_min < upper :
-            rectangles += polygon([ (int_min, 0), (int_min, f(int_min)), (int_max, f(int_min)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
-                thickness = 2, aspect_ratio = 'automatic')
-            sum += width * f(int_min)
-            int_min = int_max
-            int_max += width
+        for j in (0..n-1) :
+            temp_min = int_min + j*width
+            temp_max = int_max + j*width
+            height = f(temp_min)
+            rectangles += polygon([ (temp_min, 0), (temp_min, height), (temp_max, height), (temp_max, 0) ], color = '#60A70F', 
+                edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
+            sum += width * height
             
     elif sum_type == 'right':
-        # define first rectangle - need "rectangles" to exist before entering the loop.
-        rectangles = polygon([ (lower, 0), (lower, f(int_max)), (int_max, f(int_max)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
-            thickness = 2, aspect_ratio = 'automatic')
-        sum = width * f(int_max)
-    
-        # reset interval max and min
-        int_min = int_max
-        int_max += width
-    
         # Riemann rectangles
-        while int_min < upper :
-            rectangles += polygon([ (int_min, 0), (int_min, f(int_max)), (int_max, f(int_max)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
-                thickness = 2, aspect_ratio = 'automatic')
-            sum += width * f(int_max)
-            int_min = int_max
-            int_max += width
+        for j in (0..n-1) :
+            temp_min = int_min + j*width
+            temp_max = int_max + j*width
+            height = f(temp_max)
+            rectangles += polygon([ (temp_min, 0), (temp_min, height), (temp_max, height), (temp_max, 0) ], color = '#60A70F', 
+                edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
+            sum += width * height
             
     elif sum_type == 'midpoint':
-        # define first rectangle - need "rectangles" to exist before entering the loop.
-        rectangles = polygon([ (lower, 0), (lower, f(midpoint)), (int_max, f(midpoint)), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
-            thickness = 2, aspect_ratio = 'automatic')
-        sum = width * f(midpoint)
-    
-        # reset interval max and min
-        int_min = int_max
-        midpoint += width
-        int_max += width
-    
         # Riemann rectangles
-        while int_min < upper :
-            rectangles += polygon([ (int_min, 0), (int_min, f(midpoint)), (int_max, f(midpoint)), (int_max, 0) ], color = '#60A70F', 
+        for j in (0..n-1) :
+            temp_min = int_min + j*width
+            temp_mid = midpoint + j*width
+            temp_max = int_max + j*width
+            height = f(temp_mid)
+            rectangles += polygon([ (temp_min, 0), (temp_min, height), (temp_max, height), (temp_max, 0) ], color = '#60A70F', 
                 edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
-            sum += width * f(midpoint)
-            int_min = int_max
-            midpoint += width
-            int_max += width
+            sum += width * height
         
-    elif sum_type == 'minimum':
-        # define first rectangle - need "rectangles" to exist before entering the loop.
-        rectangles = polygon([ (lower, 0), (lower, min_height), (int_max, min_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
-            thickness = 2, aspect_ratio = 'automatic')
-        sum = width * min_height
-    
-        # reset interval max and min
-        int_min = int_max
-        int_max += width
-    
-        # Riemann rectangles
-        while int_max <= upper :
-            f_min = f(x).find_local_minimum(int_min, int_max)
-            min_height = f_min[0]
-            rectangles += polygon([ (int_min, 0), (int_min, min_height), (int_max, min_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
-                thickness = 2, aspect_ratio = 'automatic')
-            sum += width * min_height
-            int_min = int_max
-            int_max += width
+    elif sum_type == 'minimum': 
+        # Riemann rectangles       
+        for j in (0..n-1) :
+            temp_min = int_min + j*width
+            temp_max = int_max + j*width
+            f_min = f(x).find_local_minimum(temp_min, temp_max)
+            height = f_min[0]
+            rectangles += polygon([ (temp_min, 0), (temp_min, height), (temp_max, height), (temp_max, 0) ], color = '#60A70F', 
+                edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
+            sum += width * height
             
     elif sum_type == 'maximum':
-        # define first rectangle - need "rectangles" to exist before entering the loop.
-        rectangles = polygon([ (lower, 0), (lower, max_height), (int_max, max_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810', 
-            thickness = 2, aspect_ratio = 'automatic')
-        sum = width * max_height
-    
-        # reset interval max and min
-        int_min = int_max
-        int_max += width
-    
         # Riemann rectangles
-        while int_max <= upper :
-            f_max = f(x).find_local_maximum(int_min, int_max)
-            max_height = f_max[0]
-            rectangles += polygon([ (int_min, 0), (int_min, max_height), (int_max, max_height), (int_max, 0) ], color = '#60A70F', edgecolor = '#508810',
-                thickness = 2, aspect_ratio = 'automatic')
-            sum += width * max_height
-            int_min = int_max
-            int_max += width     
+        for j in (0..n-1) :
+            temp_min = int_min + j*width
+            temp_max = int_max + j*width
+            f_max = f(x).find_local_maximum(temp_min, temp_max)
+            height = f_max[0]
+            rectangles += polygon([ (temp_min, 0), (temp_min, height), (temp_max, height), (temp_max, 0) ], color = '#60A70F', 
+                edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
+            sum += width * height         
          
                       
     # combine all plots and display them superimposed
