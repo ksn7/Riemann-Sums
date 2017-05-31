@@ -27,12 +27,17 @@ $(function () {
 <div class="compute">
 <script type="text/x-sage">
 
-@interact
-def riemann( sum_type = selector(['left', 'right', 'midpoint', 'minimum', 'maximum'], label = 'type of sum:'), 
-        func = input_box( default = (x-2)^3 + 3, label = "function of x"),
-        lower = slider(-2, 6, 0.1, 2, label = "lower bound"), 
-        upper = slider(-2, 6, 0.1, 5, label = "upper bound"), 
-        n = input_box(default=3, label = "number of intervals", type = int ), 
+@interact( layout = [ ['sum_type', 'sums'], ['x_min', 'x_max', 'y_min', 'y_max'], 
+        ['func'], ['lower', 'upper', 'n'] ] )
+def riemann( x_min = input_box( default = -5, label = "x min", width = 5 ),
+        x_max = input_box( default = 5, label = "x max", width = 5 ),
+        y_min = input_box( default = -5, label = "y min", width = 5 ),
+        y_max = input_box( default = 5, label = "y max", width = 5 ),
+        sum_type = selector(['left', 'right', 'midpoint', 'minimum', 'maximum'], label = 'type of sum:'), 
+        func = input_box( default = (x-2)^3 + 3, label = "function of x", width = 20 ),
+        lower = input_box( default = 2, label = "lower bound", type = int, width = 5 ), 
+        upper = input_box( default = 5, label = "upper bound", type = int, width = 5 ),
+        n = input_box(default=3, label = "# of intervals", type = int, width = 5 ), 
         sums = False
         ):
             
@@ -56,8 +61,8 @@ def riemann( sum_type = selector(['left', 'right', 'midpoint', 'minimum', 'maxim
         upper_label = text( 'b', (upper, 4), color = 'red' )
 
     # plots curve and shows area to integrate
-    curve = plot( f(x), -2, 6, ymin = -20, ymax = 40 )
-    integral_area = plot( f(x), lower, upper, ymin = -20, ymax = 40, fill = True, fillcolor = '#F1FC16' )
+    curve = plot( f(x), x_min, x_max, ymin = y_min, ymax = y_max )
+    integral_area = plot( f(x), lower, upper, ymin = y_min, ymax = y_max, fill = True, fillcolor = '#F1FC16' )
     
     # set up for Riemann rectangles
     width = (upper - lower) / n
@@ -122,7 +127,7 @@ def riemann( sum_type = selector(['left', 'right', 'midpoint', 'minimum', 'maxim
             height = f_max[0]
             rectangles += polygon([ (temp_min, 0), (temp_min, height), (temp_max, height), (temp_max, 0) ], color = '#60A70F', 
                 edgecolor = '#508810', thickness = 2, aspect_ratio = 'automatic')
-            sum += width * height         
+            sum += width * height    
          
                       
     # combine all plots and display them superimposed
