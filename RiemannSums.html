@@ -51,14 +51,14 @@ def riemann( x_min = input_box( default = -5, label = "x min", width = 5 ),
     f(x) = func.function(x)
     
     # label endpoints with a and b
-    if f(lower) >= 0:
-        lower_label = text( 'a', (lower, -4), color = 'red' )
-    else:
-        lower_label = text( 'a', (lower, 4), color = 'red' )   
-    if f(upper) >= 0:
-        upper_label = text( 'b', (upper, -4), color = 'red' )
-    else: 
-        upper_label = text( 'b', (upper, 4), color = 'red' )
+#    if f(lower) >= 0:
+#        lower_label = text( 'a', (lower, -4), color = 'red' )
+#    else:
+#        lower_label = text( 'a', (lower, 4), color = 'red' )   
+#    if f(upper) >= 0:
+#        upper_label = text( 'b', (upper, -4), color = 'red' )
+#    else: 
+#        upper_label = text( 'b', (upper, 4), color = 'red' )
 
     # plots curve and shows area to integrate
     curve = plot( f(x), x_min, x_max, ymin = y_min, ymax = y_max )
@@ -131,7 +131,7 @@ def riemann( x_min = input_box( default = -5, label = "x min", width = 5 ),
          
                       
     # combine all plots and display them superimposed
-    graph = curve + integral_area + lower_label + upper_label + rectangles
+    graph = curve + integral_area + rectangles
     graph.show()
     
     # option for displaying the Riemann sum
